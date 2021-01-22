@@ -9,6 +9,7 @@ body{
     font-family: 'Karla', sans-serif;
     background-color: var(--col2);
     min-height: 100vh;
+    margin: 0;
 }
 
 button{
@@ -31,9 +32,9 @@ canvas{
 }
 
 .label-group-wrapper{
-    border: 5px solid var(--col1);
     border-radius: 1rem;
     padding: 1rem;
+    background-color: #fff;
 }
 
 .label-group-wrapper h4{
@@ -45,12 +46,16 @@ canvas{
 .bounding-box-list-wrapper{
     display: grid;
     row-gap: 1rem;
+    margin: 0 0 2rem 0;
 }
 
 .bounding-box-list-item{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border: 2px solid var(--col1);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
 }
 
 .bounding-box-list-del{
@@ -69,4 +74,25 @@ canvas{
     border-radius: 0.5rem;
     margin: 0.5rem 0;
     color: #fff;
+}
+
+.labelling-wrapper{
+    display: grid;
+    grid-template-columns: 70% 25%;
+    column-gap: 5%;
+    padding: 2rem;
+}
+
+.label-options-wrapper{
+
+    padding: 0.5rem;
+    background-color: var(--col1);
+    border-radius: 0.5rem;
+    display: flex;
+    color: #fff;
+    margin: 0.5rem 0;
+}
+
+.small-title{
+    margin: 0.5rem 0;
 }

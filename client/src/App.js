@@ -66,7 +66,7 @@ const App = () => {
 
 
       ctx.scale(2, 2);
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
 
       ctx.drawImage(image, 0, 0)
 
@@ -205,16 +205,17 @@ const App = () => {
   if (image) {
     var image_specs = <span>Image Width: {image.naturalWidth}, Height:  {image.naturalHeight}</span>
 
-    var labels_heading = <h4>Labels</h4>
-    var label_selection = <>
+    var labels_heading = <h4 className="small-title">Labels</h4>
+    var label_selection = <div className="label-options-wrapper">
 
       {labels.map((item, index) => {
         return (
           <div>
-            <input type="radio" value={item.text} onChange={e => setCurrentLabel({ text: e.target.value, color: getCurrentLabelColor(e.target.value) })} checked={currentLabel.text == item.text} /> {item.text}</div>)
+            <input type="radio" value={item.text} onChange={e => setCurrentLabel({ text: e.target.value, color: getCurrentLabelColor(e.target.value) })} checked={currentLabel.text == item.text} /> {item.text}
+          </div>)
       }
       )}
-    </>
+    </div>
   }
 
   if (boxesHistory.length > 0) {
@@ -236,45 +237,49 @@ const App = () => {
   console.log(boxesHistory);
 
   return (
-    <div>
-      <h1>Please provide an image and label it</h1>
-      {image_specs}
-      <br />
+    <div className="labelling-wrapper">
       <div>
-        <input type="text"
-          className="image-url-input"
-          value={imageURL}
-          onChange={e => setURL(e.target.value)}
-        />
+        <h1>Please provide an image and label it</h1>
+        {image_specs}
 
+        <div>
+          <input type="text"
+            className="image-url-input"
+            value={imageURL}
+            onChange={e => setURL(e.target.value)}
+          />
+
+        </div>
+
+        <form onSubmit={handleLabelSubmit}>
+          <input
+            type="text"
+            className="input"
+            value={newlabel}
+            onChange={e => setNewLabel(e.target.value)}
+            placeholder="Enter new label"
+            required
+          />
+          <button type="submit">Add Label</button>
+        </form>
+        {labels_heading}
+        {label_selection}
+
+        <div>
+          <canvas
+            ref={canvas}
+            onMouseDown={startDrawing}
+            onMouseUp={finishDrawing}
+            onMouseMove={draw}
+            className="labelling-canvas"
+          />
+        </div>
       </div>
-      <br />
-      <form onSubmit={handleLabelSubmit}>
-        <input
-          type="text"
-          className="input"
-          value={newlabel}
-          onChange={e => setNewLabel(e.target.value)}
-          placeholder="Enter new label"
-          required
-        />
-        <button type="submit">Add Label</button>
-      </form>
-      {labels_heading}
-      {label_selection}
-      <br />
-      <br />
       <div>
-        <canvas
-          ref={canvas}
-          onMouseDown={startDrawing}
-          onMouseUp={finishDrawing}
-          onMouseMove={draw}
-          className="labelling-canvas"
-        />
+        {boxes_list}
       </div>
 
-      {boxes_list}
+
 
     </div>
   )
