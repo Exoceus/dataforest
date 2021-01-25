@@ -21,15 +21,13 @@ button{
 }
 
 canvas{
-    border: 1px solid black;
     border-radius: 0.5rem;
-    box-shadow: 0 0 15px rgba(0, 0,0, 0.25);
+    box-shadow: 0 0 25px rgba(0, 0,0, 0.3);
     cursor: crosshair;
+    width: 100%;
+    margin: 1rem 0;
 }
 
-.image-url-input{
-    width: 500px;
-}
 
 .label-group-wrapper{
     border-radius: 1rem;
@@ -91,8 +89,22 @@ canvas{
     display: flex;
     color: #fff;
     margin: 0.5rem 0;
+    font-weight: 600;
 }
 
 .small-title{
     margin: 0.5rem 0;
+}
+
+h1{
+    margin: 0;
+}
+
+input[type=text]{
+    border: 3px solid var(--col1);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    width: 100%;
+    margin: 0.5rem 0;
+    background-color: transparent;
 }

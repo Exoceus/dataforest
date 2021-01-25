@@ -9,6 +9,8 @@ const App = () => {
   const canvas = useRef(null)
   const ctxRef = useRef(null)
 
+  const [scaleRatio, setScaleRatio] = useState(1)
+
   const [image, setImage] = useState(null)
   const [imageURL, setURL] = useState('')
 
@@ -34,8 +36,8 @@ const App = () => {
 
       ctxRef.current.strokeRect(boxes.x, boxes.y, boxes.width, boxes.height);
 
-      ctxRef.current.font = "14px Arial";
-      ctxRef.current.fillText(boxes.label, boxes.x + 4, boxes.y + 18);
+      ctxRef.current.font = `${16 * scaleRatio}px Arial`;
+      ctxRef.current.fillText(boxes.label, boxes.x + (3 * scaleRatio), boxes.y + (15 * scaleRatio));
     });
   }
 
@@ -45,7 +47,6 @@ const App = () => {
         return labels[i].color
       }
     }
-
   }
 
   useEffect(() => {
@@ -57,16 +58,20 @@ const App = () => {
 
   useEffect(() => {
     if (image && canvas) {
-      const ctx = canvas.current.getContext("2d")
-      ctx.canvas.height = image.naturalHeight * 2
-      ctx.canvas.width = image.naturalWidth * 2
+      const ctx = canvas.current.getContext("2d");
 
-      canvas.current.style.width = `${image.naturalWidth}px`;
-      canvas.current.style.height = `${image.naturalHeight}px`;
+      canvas.current.style.width = `100%`;
+      canvas.current.style.height = `100%`;
+
+      setScaleRatio(image.naturalWidth / canvas.current.offsetWidth)
+
+      ctx.canvas.height = image.naturalHeight * (1 / (image.naturalWidth / canvas.current.offsetWidth));
+      ctx.canvas.width = image.naturalWidth * (1 / (image.naturalWidth / canvas.current.offsetWidth));
 
 
-      ctx.scale(2, 2);
-      ctx.lineWidth = 3;
+      ctx.scale((1 / (image.naturalWidth / canvas.current.offsetWidth)), (1 / (image.naturalWidth / canvas.current.offsetWidth)));
+      ctx.lineWidth = Math.floor(3 * image.naturalWidth / canvas.current.offsetWidth);
+
 
       ctx.drawImage(image, 0, 0)
 
@@ -84,7 +89,7 @@ const App = () => {
   }
 
   const startDrawing = ({ nativeEvent }) => {
-    if (image) {
+    if (image && currentLabel != "") {
       const { offsetX, offsetY } = nativeEvent;
       //ctxRef.current.moveTo(offsetX, offsetY);
       ctxRef.current.beginPath()
@@ -95,7 +100,7 @@ const App = () => {
   };
 
   const finishDrawing = ({ nativeEvent }) => {
-    if (image) {
+    if (image && currentLabel != "") {
       const { offsetX, offsetY } = nativeEvent;
       ctxRef.current.closePath();
 
@@ -104,7 +109,7 @@ const App = () => {
 
       displayBoxes()
 
-      ctxRef.current.strokeRect(boxOriginX, boxOriginY, offsetX - boxOriginX, offsetY - boxOriginY);
+      ctxRef.current.strokeRect(Math.floor(boxOriginX * scaleRatio), boxOriginY * scaleRatio, Math.floor((offsetX - boxOriginX) * scaleRatio), Math.floor((offsetY - boxOriginY) * scaleRatio));
 
       if (Math.abs(offsetX - boxOriginX) > 5 && Math.abs(offsetY - boxOriginY) > 5) {
 
@@ -131,7 +136,7 @@ const App = () => {
         }
 
 
-        const newboxesHistory = [...boxesHistory, { label: currentLabel.text, x: x, y: y, width: width, height: height, color: currentLabel.color }];
+        const newboxesHistory = [...boxesHistory, { label: currentLabel.text, x: Math.floor(x * scaleRatio), y: Math.floor(y * scaleRatio), width: Math.floor(width * scaleRatio), height: Math.floor(height * scaleRatio), color: currentLabel.color }];
 
         setBoxesHistory(newboxesHistory)
 
@@ -155,19 +160,21 @@ const App = () => {
       console.log('Tee')
     }
 
-    else if (image) {
+    else if (image && currentLabel != "") {
       ctxRef.current.clearRect(0, 0, canvas.width, canvas.height);
       ctxRef.current.drawImage(image, 0, 0)
 
       displayBoxes();
 
-      ctxRef.current.setLineDash([3]);
+      ctxRef.current.setLineDash([Math.floor(4 * image.naturalWidth / canvas.current.offsetWidth)]);
 
 
       ctxRef.current.strokeStyle = "#" + currentLabel.color;
 
 
-      ctxRef.current.strokeRect(boxOriginX, boxOriginY, offsetX - boxOriginX, offsetY - boxOriginY);
+      ctxRef.current.strokeRect(Math.floor(boxOriginX * scaleRatio), boxOriginY * scaleRatio, Math.floor((offsetX - boxOriginX) * scaleRatio), Math.floor((offsetY - boxOriginY) * scaleRatio));
+
+
 
       ctxRef.current.setLineDash([0]);
 
@@ -202,9 +209,21 @@ const App = () => {
     setNewLabel("");
   };
 
-  if (image) {
+  if (image && canvas) {
     var image_specs = <span>Image Width: {image.naturalWidth}, Height:  {image.naturalHeight}</span>
 
+    var labels_input =
+      <form onSubmit={handleLabelSubmit}>
+        <input
+          type="text"
+          className="input"
+          value={newlabel}
+          onChange={e => setNewLabel(e.target.value)}
+          placeholder="Enter new label"
+          required
+        />
+        <button type="submit">Add Label</button>
+      </form>
     var labels_heading = <h4 className="small-title">Labels</h4>
     var label_selection = <div className="label-options-wrapper">
 
@@ -218,8 +237,8 @@ const App = () => {
     </div>
   }
 
-  if (boxesHistory.length > 0) {
 
+  if (boxesHistory.length > 0) {
     var boxes_list = <div className="label-group-wrapper">
       <h4>Bounding Boxes</h4>
 
@@ -233,40 +252,42 @@ const App = () => {
     </div>
   }
 
-  console.log(download_data);
+
+
+  console.log(scaleRatio);
   console.log(boxesHistory);
+
+  if (image) {
+    var canvas_styling = { display: 'block' }
+  }
+
+  else {
+    var canvas_styling = { display: 'none' }
+  }
 
   return (
     <div className="labelling-wrapper">
       <div>
-        <h1>Please provide an image and label it</h1>
+        <h1>Dataforest</h1>
         {image_specs}
 
         <div>
           <input type="text"
             className="image-url-input"
+            placeholder="Enter image URL"
             value={imageURL}
             onChange={e => setURL(e.target.value)}
           />
 
         </div>
 
-        <form onSubmit={handleLabelSubmit}>
-          <input
-            type="text"
-            className="input"
-            value={newlabel}
-            onChange={e => setNewLabel(e.target.value)}
-            placeholder="Enter new label"
-            required
-          />
-          <button type="submit">Add Label</button>
-        </form>
+        {labels_input}
         {labels_heading}
         {label_selection}
 
         <div>
           <canvas
+            style={canvas_styling}
             ref={canvas}
             onMouseDown={startDrawing}
             onMouseUp={finishDrawing}
